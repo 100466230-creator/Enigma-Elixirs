@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enigma Elixirs</title>
+<meta name="description" content="Enigma Elixirs: coffee bar. Mira el menú y haz tu pedido por WhatsApp.">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#ffffff; --tinta:#000000; --gris:#5c5c5c; --linea:#d9d9d9; --vino:#7a1f2b;
+  --serif:"IM Fell English","Iowan Old Style",Georgia,serif;
+  --sc:"IM Fell English SC","IM Fell English",Georgia,serif;
+  --sans:"Work Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--papel);color:var(--tinta);font:400 1rem/1.6 var(--sans);-webkit-text-size-adjust:100%}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--vino);outline-offset:3px}
+.wrap{max-width:640px;margin:0 auto;padding:0 20px}
+
+/* Hero: el logo es lo memorable */
+.hero{text-align:center;padding:40px 0 28px}
+.hero img{width:min(78vw,340px);height:auto;display:block;margin:0 auto}
+.hero p{font:italic 1.2rem/1.4 var(--serif);margin:18px auto 0;max-width:30ch}
+@media (prefers-reduced-motion:no-preference){
+  .hero img{animation:giro 1.4s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes giro{from{opacity:0;transform:rotate(-14deg) scale(.94)}to{opacity:1;transform:none}}
+}
+nav{border-block:1px solid var(--tinta);display:flex;justify-content:center;gap:28px;padding:12px 0;position:sticky;top:0;background:var(--papel);z-index:5}
+nav a{font:1.05rem var(--sc);text-decoration:none;letter-spacing:.06em}
+nav a:hover{color:var(--vino)}
+
+section{padding:44px 0 8px}
+h2{font:400 2rem/1.1 var(--serif);margin:0 0 6px}
+.nota{color:var(--gris);font-size:.92rem;margin:0 0 22px}
+h3{font:1.15rem var(--sc);letter-spacing:.06em;margin:30px 0 4px;border-bottom:1px solid var(--tinta);padding-bottom:4px}
+
+.item{display:grid;grid-template-columns:1fr auto;gap:2px 14px;align-items:center;padding:12px 0;border-bottom:1px dotted var(--linea)}
+.item b{font:600 1rem var(--sans)}
+.item .desc{grid-column:1;color:var(--gris);font-size:.9rem;line-height:1.4}
+.item .precio{font:1.1rem var(--serif);text-align:right}
+.ctrl{grid-column:2;grid-row:2;justify-self:end;display:flex;align-items:center;gap:10px}
+.ctrl button{width:36px;height:36px;border:1px solid var(--tinta);background:var(--papel);font-size:1.2rem;line-height:1;cursor:pointer;border-radius:50%}
+.ctrl button:hover{background:var(--tinta);color:var(--papel)}
+.ctrl span{min-width:1.2ch;text-align:center;font-weight:600}
+
+/* Pedido */
+.pedido{background:var(--tinta);color:var(--papel);padding:26px 22px;margin-top:10px}
+.pedido h2{color:var(--papel)}
+.pedido ul{list-style:none;margin:14px 0;padding:0}
+.pedido li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #444}
+.vacio{color:#bbb}
+.total{display:flex;justify-content:space-between;font:1.3rem var(--serif);margin:14px 0 18px}
+label{display:block;font-size:.9rem;margin-bottom:4px}
+input,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--papel);background:var(--papel);color:var(--tinta);border-radius:0;margin-bottom:14px}
+.enviar{width:100%;padding:15px;border:0;background:var(--papel);color:var(--tinta);font:1.1rem var(--sc);letter-spacing:.06em;cursor:pointer}
+.enviar:hover:not(:disabled){background:var(--vino);color:var(--papel)}
+.enviar:disabled{opacity:.45;cursor:not-allowed}
+
+.info dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 18px}
+.info dt{font:1rem var(--sc);letter-spacing:.05em}
+.info dd{margin:0}
+footer{text-align:center;color:var(--gris);font-size:.85rem;padding:40px 0 48px}
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <img src="logo.png" alt="Logo de Enigma Elixirs, con copas y un vaso sobre servilletas">
+  <p>Café y elixires hechos con calma.</p>
+</header>
+
+<nav aria-label="Secciones">
+  <a href="#menu">Menú</a>
+  <a href="#pedido">Tu pedido</a>
+  <a href="#visitanos">Visítanos</a>
+</nav>
+
+<main class="wrap">
+  <section id="menu">
+    <h2>Menú</h2>
+    <p class="nota">Toca + para agregar a tu pedido.</p>
+    <div id="lista"></div>
+  </section>
+
+  <section id="pedido">
+    <div class="pedido">
+      <h2>Tu pedido</h2>
+      <ul id="resumen" aria-live="polite"></ul>
+      <div class="total"><span>Total</span><span id="total">$0</span></div>
+      <label for="nombre">Tu nombre</label>
+      <input id="nombre" autocomplete="name">
+      <label for="notas">Notas (opcional)</label>
+      <textarea id="notas" rows="2" placeholder="Sabores del smoothie, sin azúcar, hora de recogida…"></textarea>
+      <button class="enviar" id="enviar" disabled>Enviar pedido por WhatsApp</button>
+    </div>
+  </section>
+
+  <section id="visitanos" class="info">
+    <h2>Visítanos</h2>
+    <dl>
+      <dt>Horario</dt><dd id="horario"></dd>
+      <dt>Dirección</dt><dd id="direccion"></dd>
+      <dt>Instagram</dt><dd><a href="https://instagram.com/Enigmaelixirs" target="_blank" rel="noopener">@Enigmaelixirs</a></dd>
+    </dl>
+  </section>
+</main>
+
+<footer>Enigma Elixirs · Desde 2023</footer>
+
+<script>
+/* ============ EDITA AQUÍ ============ */
+const NEGOCIO = {
+  whatsapp: "18299308364",              // +1 (829) 930-8364, con código de país, sin + ni espacios
+  horario:  "Lunes a sábado, 8:00 AM a 10:00 PM (horario corrido). Domingos sujeto a pedidos.",
+  direccion:"Calle Hostos #35, al lado de la tapicería Kiko",
+  moneda:   "$"
+};
+const MENU = [
+  { categoria: "Café", productos: [
+    { nombre: "Espresso",   desc: "Doble shot de café fuerte.", precio: 100 },
+    { nombre: "Americano",  desc: "Doble shot de café fuerte, disuelto en agua.", precio: 150 },
+    { nombre: "Cortado",    desc: "Café y leche en partes iguales.", precio: 175 },
+    { nombre: "Cappuccino", desc: "Café fuerte con leche texturizada.", precio: 200 },
+    { nombre: "Mocaccino",  desc: "Café, chocolate y leche.", precio: 250 },
+    { nombre: "Artesanal en greca", desc: "", precio: 50 }
+  ]},
+  { categoria: "Iced coffee", productos: [
+    { nombre: "Iced Coffee", desc: "Café, leche y hielo.", precio: 250 },
+    { nombre: "Frappe", desc: "Café, leche, base neutra, crema batida y topping a elegir.", precio: 300 },
+    { nombre: "Iced Flavored Coffee", desc: "Café, leche, topping de base a elegir.", precio: 300 },
+    { nombre: "Iced Mocha", desc: "Café, chocolate y leche.", precio: 350 },
+    { nombre: "Iced Macchiato", desc: "Café, leche saborizada y cold foam.", precio: 350 },
+    { nombre: "Matcha Latte", desc: "Natural, mango, cranberry, pitaya o frutos rojos.", precio: 400 },
+    { nombre: "Tres Leches Iced Coffee", desc: "", precio: 350 },
+    { nombre: "Chocolate Dubai Iced Coffee 12 oz", desc: "", precio: 450 },
+    { nombre: "Chocolate Dubai Iced Coffee 16 oz", desc: "", precio: 550 },
+    { nombre: "Frappe de Matcha", desc: "", precio: null },
+    { nombre: "Frappe de Fresas con Crema", desc: "", precio: 350 }
+  ]},
+  { categoria: "Bocatas", productos: [
+    { nombre: "Enigma Croissant’s", desc: "", precio: 300 },
+    { nombre: "Croissant", desc: "Con queso Gouda.", precio: 175 },
+    { nombre: "Croissant’s", desc: "Con queso, rúcula y jamón serrano.", precio: 200 },
+    { nombre: "Minis Croissants", desc: "Con queso crema.", precio: 50 }
+  ]},
+  { categoria: "Smoothies", productos: [
+    { nombre: "Smoothie", desc: "1 o 2 sabores: guineo, sandía, piña, limón, fresa, pitaya, mango o frutos rojos. Indícalos en las notas.", precio: 200 },
+    { nombre: "Smoothie con yogurt griego o proteína", desc: "Y más opciones. Cuéntanos qué quieres en las notas.", precio: null }
+  ]},
+  { categoria: "Cócteles", productos: [
+    { nombre: "Mojito", desc: "Sabores: limón, chinola, fresa o coco. Indica el sabor en las notas.", precio: 300 },
+    { nombre: "Caipirinha", desc: "Sabores: limón, chinola, fresa o coco. Indica el sabor en las notas.", precio: 250 },
+    { nombre: "Margarita", desc: "", precio: 350 },
+    { nombre: "Tequila Sunrise", desc: "", precio: 350 },
+    { nombre: "Cosmopolitan", desc: "", precio: 350 },
+    { nombre: "Moscow Mule", desc: "", precio: 350 },
+    { nombre: "Gin Tonic", desc: "", precio: 300 },
+    { nombre: "Cuba Libre", desc: "", precio: 250 },
+    { nombre: "Vodka Tonic", desc: "", precio: 300 },
+    { nombre: "Sangrías", desc: "", precio: 250 },
+    { nombre: "Diablito", desc: "", precio: 400 },
+    { nombre: "Orgasmo", desc: "", precio: 350 },
+    { nombre: "Blue Lagoon", desc: "", precio: 250 },
+    { nombre: "Passion Blue", desc: "", precio: 350 },
+    { nombre: "Lemone", desc: "", precio: 350 }
+  ]}
+];
+/* ================================== */
+
+const carrito = {};           // nombre -> {precio, cant}
+const $ = id => document.getElementById(id);
+const fmt = n => NEGOCIO.moneda + n;
+
+$("horario").textContent = NEGOCIO.horario;
+$("direccion").textContent = NEGOCIO.direccion;
+
+function pintarMenu(){
+  $("lista").innerHTML = MENU.map(c => `
+    <h3>${c.categoria}</h3>
+    ${c.productos.map(p => `
+      <div class="item">
+        <b>${p.nombre}</b><span class="precio">${p.precio == null ? "Consultar" : fmt(p.precio)}</span>
+        ${p.desc ? `<span class="desc">${p.desc}</span>` : ""}
+        <div class="ctrl">
+          <button type="button" aria-label="Quitar ${p.nombre}" data-n="${p.nombre}" data-d="-1">−</button>
+          <span id="c-${p.nombre}" aria-live="polite">0</span>
+          <button type="button" aria-label="Agregar ${p.nombre}" data-n="${p.nombre}" data-d="1" data-p="${p.precio}">+</button>
+        </div>
+      </div>`).join("")}
+  `).join("");
+}
+
+function actualizar(){
+  let total = 0, filas = "", items = 0, pend = false;
+  for (const [n, it] of Object.entries(carrito)){
+    if (it.cant > 0){
+      items += it.cant;
+      if (it.precio == null) pend = true; else total += it.cant * it.precio;
+      filas += `<li><span>${it.cant} × ${n}</span><span>${it.precio == null ? "Por confirmar" : fmt(it.cant*it.precio)}</span></li>`;
+    }
+  }
+  $("resumen").innerHTML = filas || '<li class="vacio">Aún no agregas nada. Elige algo del menú.</li>';
+  $("total").textContent = fmt(total) + (pend ? " + por confirmar" : "");
+  $("enviar").disabled = items === 0;
+  document.querySelectorAll("[id^='c-']").forEach(e => e.textContent = (carrito[e.id.slice(2)]||{cant:0}).cant);
+}
+
+$("lista").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  const n = b.dataset.n, d = +b.dataset.d;
+  const prod = MENU.flatMap(c => c.productos).find(p => p.nombre === n);
+  const it = carrito[n] || (carrito[n] = {precio: prod.precio, cant: 0});
+  it.cant = Math.max(0, it.cant + d);
+  actualizar();
+});
+
+$("enviar").addEventListener("click", () => {
+  const sel = Object.entries(carrito).filter(([,i]) => i.cant > 0);
+  const lineas = sel.map(([n,i]) => `• ${i.cant} × ${n} (${i.precio == null ? "precio por confirmar" : fmt(i.cant*i.precio)})`);
+  const total = sel.reduce((t,[,i]) => t + (i.precio == null ? 0 : i.cant*i.precio), 0);
+  const pend = sel.some(([,i]) => i.precio == null);
+  const nombre = $("nombre").value.trim(), notas = $("notas").value.trim();
+  const partes = ["Hola, quiero hacer un pedido en Enigma Elixirs:", "", ...lineas, "",
+    `Total: ${fmt(total)}${pend ? " + productos por confirmar" : ""}`];
+  if (nombre) partes.push(`Nombre: ${nombre}`);
+  if (notas) partes.push(`Notas: ${notas}`);
+  window.open(`https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(partes.join("\n"))}`, "_blank", "noopener");
+});
+
+pintarMenu();
+actualizar();
+</script>
+</body>
+</html>
